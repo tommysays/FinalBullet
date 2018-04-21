@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class BulletSpawner : MonoBehaviour {
+	private GameController gameController;
 	public GameObject bulletPrefab;
 	public GameObject carrierPrefab;
 	public GameObject pointer;
@@ -11,11 +12,15 @@ public class BulletSpawner : MonoBehaviour {
 	/// Time (seconds) between volleys. Can change based on difficulty, but must stay the same during a battle.
 	/// In-battle changes should be multipliers based on this value.
 	private float volleyInterval = 1f;
+	private float bulletSpeed = 300f;
 	
+	void Start() {
+		gameController = FindObjectOfType<GameController>();
+	}
+
 	void Update() {
 		if (Time.time - lastVolleyTime > volleyInterval) {
 			lastVolleyTime = Time.time;
-			Debug.Log("Spawning volley!");
 			SpawnBullets(transform.position);
 		}
 	}
@@ -32,13 +37,13 @@ public class BulletSpawner : MonoBehaviour {
 	private void SpawnBurst(GameObject parent, int count) {
 		Vector3 parentDirection = parent.transform.forward;
 		int offset = 5;
-		int evensOffset = 0;
-		float bulletSpeed = 3f;
+		// TODO Even-numbered bursts are a little off angled.
+		float evensOffset = 0;
 		if (count % 2 == 0) {
 			evensOffset = offset / 2;
 		}
 		for (int i = 1; i <= count; i++) {
-			int angle = offset * (i / 2) + evensOffset;
+			float angle = offset * (i / 2) + evensOffset;
 			Vector3 direction;
 			if (i % 2 == 0) {
 				direction = Quaternion.Euler(0, angle, 0) * parentDirection;
@@ -48,6 +53,7 @@ public class BulletSpawner : MonoBehaviour {
 			GameObject bullet = Instantiate(bulletPrefab, parent.transform.position, Quaternion.LookRotation(direction));
 			bullet.transform.SetParent(parent.transform);
 			bullet.GetComponent<Rigidbody>().velocity = direction * bulletSpeed;
+			bullet.GetComponent<BulletController>().gameController = gameController;
 		}
 	}
 

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class PointerController : MonoBehaviour {
-	private float speed = 5f;
+	private float speed = 500f;
 
 	// Use this for initialization
 	void Start () {
