@@ -12,6 +12,9 @@ public class GameController : MonoBehaviour {
 	private Boss boss;
 	private ScalingBar bossHpBar;
 	private CrosshairSpawner crosshairSpawner;
+	private int crosshairCounter = 0;
+	/// When the counter reaches this limit, the next crosshair attack deals extra damage.
+	private int crosshairStrike = 2;
 
 	// Use this for initialization
 	void Start () {
@@ -31,7 +34,7 @@ public class GameController : MonoBehaviour {
 	}
 
 	public void handleAttackClick() {
-		crosshairSpawner.spawnAttack(3);
+		crosshairSpawner.spawnAttack(9);
 	}
 
 	public void handleItemClick() {
@@ -42,6 +45,13 @@ public class GameController : MonoBehaviour {
 		Debug.Log("Magic was selected");
 	}
 
+	public void crosshairAttack(Vector3 origin, int amount) {
+		if (crosshairCounter++ >= crosshairStrike) {
+			crosshairCounter = 0;
+			amount *= 3;
+		}
+		damageBoss(origin, amount);
+	}
 	public void damageBoss(Vector3 origin, int amount) {
 		GameObject particles = Instantiate(damageParticleSystem, origin, Quaternion.identity);
 		particles.GetComponent<DamageParticleController>().destination = bulletSpawnerObj.transform.position;
