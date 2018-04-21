@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class PointerController : MonoBehaviour {
 	private Rigidbody body;
-	private float speed = 500f;
+	private float speed = 300f;
 
 	void Start () {
 		body = GetComponent<Rigidbody>();

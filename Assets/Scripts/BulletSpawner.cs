@@ -13,6 +13,8 @@ public class BulletSpawner : MonoBehaviour {
 	/// In-battle changes should be multipliers based on this value.
 	private float volleyInterval = 1f;
 	private float bulletSpeed = 300f;
+	private float carrierSpeed = 200f;
+	private float expandSpeed = 40f;
 	
 	void Start() {
 		gameController = FindObjectOfType<GameController>();
@@ -28,14 +30,15 @@ public class BulletSpawner : MonoBehaviour {
 	/// Selects a volley type and spawns bullets.
 	private void SpawnBullets(Vector3 spawnpoint) {
 		Vector3 direction = pointer.transform.position - spawnpoint;
-		GameObject carrier = Instantiate(carrierPrefab, spawnpoint, Quaternion.LookRotation(direction));
-		SpawnBurst(carrier, Random.Range(2, 5));
+		direction = Vector3.Normalize(direction);
+		SpawnBurst(spawnpoint, direction, Random.Range(4,8));
+		SpawnCircle(spawnpoint, direction, Random.Range(15, 25));
+		SpawnDirectedCircle(spawnpoint, direction, Random.Range(8, 15));
 	}
 
-	/// Spawns a shotgun burst of bullets that aim at the pointer, with a spread based on number of bullets.
-	/// The bullets move independent of the carrier.
-	private void SpawnBurst(GameObject parent, int count) {
-		Vector3 parentDirection = parent.transform.forward;
+	/// Spawns a shotgun burst of bullets with a spread based on number of bullets.
+	/// These bullets don't use a carrier, since they move independent of each other after spawn.
+	private void SpawnBurst(Vector3 spawnpoint, Vector3 direction, int count) {
 		int offset = 5;
 		// TODO Even-numbered bursts are a little off angled.
 		float evensOffset = 0;
@@ -44,21 +47,59 @@ public class BulletSpawner : MonoBehaviour {
 		}
 		for (int i = 1; i <= count; i++) {
 			float angle = offset * (i / 2);
-			Vector3 direction;
+			Vector3 forward;
 			if (i % 2 == 0) {
-				direction = Quaternion.Euler(0, angle - evensOffset, 0) * parentDirection;
+				forward = Quaternion.Euler(0, angle - evensOffset, 0) * direction;
 			} else {
-				direction = Quaternion.Euler(0, -angle - evensOffset, 0) * parentDirection;
+				forward = Quaternion.Euler(0, -angle - evensOffset, 0) * direction;
 			}
-			GameObject bullet = Instantiate(bulletPrefab, parent.transform.position, Quaternion.LookRotation(direction));
-			bullet.transform.SetParent(parent.transform);
-			bullet.GetComponent<Rigidbody>().velocity = direction * bulletSpeed;
+			GameObject bullet = Instantiate(bulletPrefab, spawnpoint, Quaternion.LookRotation(forward));
+			bullet.GetComponent<Rigidbody>().velocity = forward * bulletSpeed;
 			bullet.GetComponent<BulletController>().gameController = gameController;
 		}
 	}
 
-	/// Spawns a circle of bullets that aim at the pointer. The carrier does the moving instead of the bullets.
-	private void SpawnCircle(float radius, int count) {
+	/// Spawns an expanding circle not aimed at anything in particular.
+	private void SpawnCircle(Vector3 spawnpoint, Vector3 direction, int count) {
+		if (count == 1) {
+			GameObject bullet = Instantiate(bulletPrefab, spawnpoint, Quaternion.LookRotation(direction));
+			bullet.GetComponent<Rigidbody>().velocity = direction * bulletSpeed;
+			bullet.GetComponent<BulletController>().gameController = gameController;
+			return;
+		}
+		if (count == 0) {
+			Debug.LogError("Cannot spawn circle of fewer than 1 bullet.");
+			return;
+		}
+		float partition = 360f / count;
+		for (int i = 1; i <= count; i++) {
+			Vector3 rotation = new Vector3(0, i * partition, 0);
+			GameObject bullet = Instantiate(bulletPrefab, spawnpoint, Quaternion.Euler(rotation));
+			print(bullet.transform.rotation);
+			bullet.GetComponent<Rigidbody>().velocity = bullet.transform.forward * expandSpeed;
+			bullet.GetComponent<BulletController>().gameController = gameController;
+		}
+	}
 
+	/// Spawns an expanding circle of bullets aimed at the player.
+	private void SpawnDirectedCircle(Vector3 spawnpoint, Vector3 direction, int count) {
+		if (count == 1) {
+			GameObject bullet = Instantiate(bulletPrefab, spawnpoint, Quaternion.LookRotation(direction));
+			bullet.GetComponent<Rigidbody>().velocity = direction * bulletSpeed;
+			bullet.GetComponent<BulletController>().gameController = gameController;
+			return;
+		}
+		if (count == 0) {
+			Debug.LogError("Cannot spawn circle of fewer than 1 bullet.");
+			return;
+		}
+		float partition = 360f / count;
+		for (int i = 1; i <= count; i++) {
+			Vector3 rotation = new Vector3(0, i * partition, 0);
+			GameObject bullet = Instantiate(bulletPrefab, spawnpoint, Quaternion.Euler(rotation));
+			print(bullet.transform.rotation);
+			bullet.GetComponent<Rigidbody>().velocity = bullet.transform.forward * expandSpeed + direction * carrierSpeed;
+			bullet.GetComponent<BulletController>().gameController = gameController;
+		}
 	}
 }
