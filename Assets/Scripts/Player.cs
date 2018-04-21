@@ -1,5 +1,7 @@
 ﻿using UnityEngine;
 
+/// Keeps track of the player's HP.
+/// TODO Can add bonuses to damage, healing, cooldowns based on player "level".
 public class Player {
 	private const int MAX_HP = 100;
 	public int hp = 100;

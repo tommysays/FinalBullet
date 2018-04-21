@@ -4,22 +4,29 @@ JRPG-esque GUI and party commands (attack, item, magic)
 
 During a battle, the boss will spawn tons of bullets that can damage the player. The player must avoid the bullets while also dealing damage to the boss.
 The player will have a small menu of commands they can issue to their party (Attack, Item, Magic).
+While selecting a command, the bullets (and player movement) will be paused.
 Once a command is issued, the player has a limited amount of time to complete a small objective to successfully execute the command.
 After the objective is completed, or if time runs out, a new command can be issued.
+Attack and Item commands have small rewards for completing all objectives.
 
 Attack:
-	Spawns several crosshairs on the field. If the player touches them, the boss will be damaged. (Maybe make crosshairs move?)
+	Spawns several crosshairs on the field. If the player touches them, the boss will be damaged.
+	Last crosshair does extra damage (reward for completing objective)
+	(Maybe make crosshairs move to increase difficulty)
 
 Item: (1 turn cooldown, i.e. every other))
 	Spawns a random set of items on the field.
 	Potion:
 		Spawns potion bottles on the field. The player can hover over a potion to heal over time. Leaving the potion will stop healing.
+		Last potion heals instantly (reward for completing objective)
 	Bomb:
 		Spawns several bombs on the field. Same mechanic as Attack crosshairs, but less damage.
 		(This is a "trap" in that players fishing for potions may draw this item instead.)
+		Last bomb does extra damage (reward for completing objective)
 
 Magic: (2 turn cooldown)
-	Spawns several points that must be touched in the correct order. If successful, a random spell will be cast.
+	Spawns several pentagram points that must be touched in the correct order. If successful, a random spell will be cast.
+	Completing a spell should play a special animation and keep the game "paused" until it completes.
 	Slow:
 		Slows bullets and volley intervals for a few rounds
 	Fireball:

@@ -28,10 +28,12 @@ public class BulletSpawner : MonoBehaviour {
 	}
 
 	/// Spawns a shotgun burst of bullets that aim at the pointer, with a spread based on number of bullets.
+	/// The bullets move independent of the carrier.
 	private void SpawnBurst(GameObject parent, int count) {
 		Vector3 parentDirection = parent.transform.forward;
 		int offset = 5;
 		int evensOffset = 0;
+		float bulletSpeed = 3f;
 		if (count % 2 == 0) {
 			evensOffset = offset / 2;
 		}
@@ -45,10 +47,11 @@ public class BulletSpawner : MonoBehaviour {
 			}
 			GameObject bullet = Instantiate(bulletPrefab, parent.transform.position, Quaternion.LookRotation(direction));
 			bullet.transform.SetParent(parent.transform);
+			bullet.GetComponent<Rigidbody>().velocity = direction * bulletSpeed;
 		}
 	}
 
-	/// Spawns a circle of bullets that aim at the pointer.
+	/// Spawns a circle of bullets that aim at the pointer. The carrier does the moving instead of the bullets.
 	private void SpawnCircle(float radius, int count) {
 
 	}
