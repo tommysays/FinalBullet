@@ -12,9 +12,12 @@ public class BulletSpawner : MonoBehaviour {
 	/// Time (seconds) between volleys. Can change based on difficulty, but must stay the same during a battle.
 	/// In-battle changes should be multipliers based on this value.
 	private float volleyInterval = 1f;
-	private float bulletSpeed = 300f;
-	private float carrierSpeed = 200f;
-	private float expandSpeed = 40f;
+	private float bulletSpeed = 250f;
+	private float carrierSpeed = 130f;
+	private float expandSpeed = 60f;
+	/// Spawns an undirected circle every few volleys.
+	private int circleCounter = 0;
+	private int circleCounterMax = 3;
 	
 	void Start() {
 		gameController = FindObjectOfType<GameController>();
@@ -31,9 +34,16 @@ public class BulletSpawner : MonoBehaviour {
 	private void SpawnBullets(Vector3 spawnpoint) {
 		Vector3 direction = pointer.transform.position - spawnpoint;
 		direction = Vector3.Normalize(direction);
-		SpawnBurst(spawnpoint, direction, Random.Range(4,8));
-		SpawnCircle(spawnpoint, direction, Random.Range(15, 25));
-		SpawnDirectedCircle(spawnpoint, direction, Random.Range(8, 15));
+		float rand = Random.Range(0f, 1f);
+		if (rand < 0.6f) {
+			SpawnBurst(spawnpoint, direction, Random.Range(4,8));
+		} else {
+			SpawnDirectedCircle(spawnpoint, direction, Random.Range(8, 15));
+		}
+		if (circleCounter++ > circleCounterMax) {
+			circleCounter = 0;
+			SpawnCircle(spawnpoint, direction, Random.Range(15, 25));
+		}
 	}
 
 	/// Spawns a shotgun burst of bullets with a spread based on number of bullets.
@@ -75,7 +85,6 @@ public class BulletSpawner : MonoBehaviour {
 		for (int i = 1; i <= count; i++) {
 			Vector3 rotation = new Vector3(0, i * partition, 0);
 			GameObject bullet = Instantiate(bulletPrefab, spawnpoint, Quaternion.Euler(rotation));
-			print(bullet.transform.rotation);
 			bullet.GetComponent<Rigidbody>().velocity = bullet.transform.forward * expandSpeed;
 			bullet.GetComponent<BulletController>().gameController = gameController;
 		}
@@ -97,7 +106,6 @@ public class BulletSpawner : MonoBehaviour {
 		for (int i = 1; i <= count; i++) {
 			Vector3 rotation = new Vector3(0, i * partition, 0);
 			GameObject bullet = Instantiate(bulletPrefab, spawnpoint, Quaternion.Euler(rotation));
-			print(bullet.transform.rotation);
 			bullet.GetComponent<Rigidbody>().velocity = bullet.transform.forward * expandSpeed + direction * carrierSpeed;
 			bullet.GetComponent<BulletController>().gameController = gameController;
 		}

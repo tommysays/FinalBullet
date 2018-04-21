@@ -30,7 +30,7 @@ public class CrosshairSpawner : MonoBehaviour {
 			float z = Random.Range(zMin, zMax);
 			GameObject crosshair = Instantiate(crosshairPrefab, new Vector3(x, 1, z), Quaternion.identity);
 			crosshair.transform.rotation = Quaternion.Euler(0, Random.Range(0, 360), 0);
-			crosshair.GetComponent<Rigidbody>().angularVelocity = new Vector3(0, 60, 0);
+			crosshair.GetComponent<Rigidbody>().angularVelocity = new Vector3(0, 2.5f, 0);
 			crosshair.GetComponent<CrosshairController>().gameController = gameController;
 		}
 	}

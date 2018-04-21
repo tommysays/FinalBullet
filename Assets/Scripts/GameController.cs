@@ -6,6 +6,8 @@ using UnityEngine;
 public class GameController : MonoBehaviour {
 	public GameObject bossHealthBar;
 	public GameObject crosshairSpawnerObj;
+	public GameObject bulletSpawnerObj;
+	public GameObject damageParticleSystem;
 	private Player player;
 	private Boss boss;
 	private ScalingBar bossHpBar;
@@ -38,6 +40,12 @@ public class GameController : MonoBehaviour {
 
 	public void handleMagicClick() {
 		Debug.Log("Magic was selected");
+	}
+
+	public void damageBoss(Vector3 origin, int amount) {
+		GameObject particles = Instantiate(damageParticleSystem, origin, Quaternion.identity);
+		particles.GetComponent<DamageParticleController>().destination = bulletSpawnerObj.transform.position;
+		damageBoss(amount);
 	}
 
 	public void damageBoss(int amount) {

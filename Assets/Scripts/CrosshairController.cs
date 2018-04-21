@@ -10,7 +10,7 @@ public class CrosshairController : MonoBehaviour {
 	void OnTriggerEnter(Collider other) {
 		if (other.tag == "Pointer") {
 			// TODO Visual indicator that this was picked up and boss gets damaged.
-			gameController.damageBoss(damage);
+			gameController.damageBoss(transform.position, damage);
 			Destroy(this.gameObject);
 		}
 	}
