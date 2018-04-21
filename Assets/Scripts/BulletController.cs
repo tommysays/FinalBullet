@@ -9,7 +9,6 @@ public class BulletController : MonoBehaviour {
 	public int damage = 10;
 	void OnTriggerEnter(Collider other) {
 		if (other.tag == "Pointer") {
-			Debug.Log("Player was hit for " + damage + " damage!");
 			// TODO Visual indication that player was hit.
 			gameController.damagePlayer(damage);
 			Destroy(this.gameObject);

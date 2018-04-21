@@ -21,7 +21,6 @@ public class ScalingBar : MonoBehaviour {
 	// Use this for initialization
 	void Start() {
 		maxWidth = fullBar.GetComponent<RectTransform>().sizeDelta.x;
-		Debug.Log(maxWidth);
 		currentRect = currentBar.GetComponent<RectTransform>();
 		height = currentRect.sizeDelta.y;
 	}
@@ -37,7 +36,6 @@ public class ScalingBar : MonoBehaviour {
 				width = maxWidth;
 				shouldSlide = false;
 			}
-			Debug.Log(width + ", " + curValue);
 			currentRect.sizeDelta = new Vector2(width, height);
 		}
 	}
