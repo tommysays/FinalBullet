@@ -40,10 +40,10 @@ public class BulletSpawner : MonoBehaviour {
 		// TODO Even-numbered bursts are a little off angled.
 		float evensOffset = 0;
 		if (count % 2 == 0) {
-			evensOffset = offset / 2;
+			evensOffset = offset / 2.0f;
 		}
 		for (int i = 1; i <= count; i++) {
-			float angle = offset * (i / 2) + evensOffset;
+			float angle = offset * (i / 2) - evensOffset;
 			Vector3 direction;
 			if (i % 2 == 0) {
 				direction = Quaternion.Euler(0, angle, 0) * parentDirection;

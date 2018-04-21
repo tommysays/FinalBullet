@@ -20,9 +20,8 @@ Item: (1 turn cooldown, i.e. every other))
 		Spawns potion bottles on the field. The player can hover over a potion to heal over time. Leaving the potion will stop healing.
 		Last potion heals instantly (reward for completing objective)
 	Bomb:
-		Spawns several bombs on the field. Same mechanic as Attack crosshairs, but less damage.
-		(This is a "trap" in that players fishing for potions may draw this item instead.)
-		Last bomb does extra damage (reward for completing objective)
+		Spawns a few bombs on the field. Touch to clear bullets in a small radius around the bomb.
+		Last bomb clears a larger radius of bullets (reward for completing objective)
 
 Magic: (2 turn cooldown)
 	Spawns several pentagram points that must be touched in the correct order. If successful, a random spell will be cast.

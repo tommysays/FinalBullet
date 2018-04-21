@@ -7,14 +7,14 @@ public class GameController : MonoBehaviour {
 	public GameObject bossHealthBar;
 	private Player player;
 	private Boss boss;
-	private HpBar bossHpBar;
+	private ScalingBar bossHpBar;
 
 	// Use this for initialization
 	void Start () {
 		player = new Player();
 		boss = new Boss();
 
-		bossHpBar = bossHealthBar.GetComponent<HpBar>();
+		bossHpBar = bossHealthBar.GetComponent<ScalingBar>();
 		bossHpBar.maxValue = boss.hp;
 		bossHpBar.curValue = boss.hp;
 	}

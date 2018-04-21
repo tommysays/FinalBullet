@@ -3,18 +3,16 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class PointerController : MonoBehaviour {
+	private Rigidbody body;
 	private float speed = 500f;
 
-	// Use this for initialization
 	void Start () {
-		
+		body = GetComponent<Rigidbody>();
 	}
 	
-	// Update is called once per frame
-	void Update () {
-		float adjustedSpeed = Time.deltaTime * speed;
-		float x = Input.GetAxis("Horizontal") * adjustedSpeed;
-		float y = Input.GetAxis("Vertical") * adjustedSpeed;
-		transform.Translate(x, 0, y);
+	void FixedUpdate () {
+		float x = Input.GetAxis("Horizontal") * speed;
+		float z = Input.GetAxis("Vertical") * speed;
+		body.velocity = new Vector3(x, 0, z);
 	}
 }

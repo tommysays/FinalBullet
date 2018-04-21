@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class HpBar : MonoBehaviour {
+public class ScalingBar : MonoBehaviour {
 	public const float SLIDE_SPEED = 0.5f;
 	public GameObject fullBar;
 	public GameObject currentBar;
