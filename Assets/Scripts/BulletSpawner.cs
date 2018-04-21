@@ -43,12 +43,12 @@ public class BulletSpawner : MonoBehaviour {
 			evensOffset = offset / 2.0f;
 		}
 		for (int i = 1; i <= count; i++) {
-			float angle = offset * (i / 2) - evensOffset;
+			float angle = offset * (i / 2);
 			Vector3 direction;
 			if (i % 2 == 0) {
-				direction = Quaternion.Euler(0, angle, 0) * parentDirection;
+				direction = Quaternion.Euler(0, angle - evensOffset, 0) * parentDirection;
 			} else {
-				direction = Quaternion.Euler(0, -angle, 0) * parentDirection;
+				direction = Quaternion.Euler(0, -angle - evensOffset, 0) * parentDirection;
 			}
 			GameObject bullet = Instantiate(bulletPrefab, parent.transform.position, Quaternion.LookRotation(direction));
 			bullet.transform.SetParent(parent.transform);
