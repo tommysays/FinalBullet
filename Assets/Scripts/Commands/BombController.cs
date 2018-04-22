@@ -19,6 +19,7 @@ public class BombController : CommandObjectController {
 		if (isLit && !despawning) {
 			float delta = Time.time - fuseStart;
 			if (delta > fuseDelay) {
+				isLit = false;
 				gameController.bombAttack(transform.position, damage);
 				despawn();
 			}

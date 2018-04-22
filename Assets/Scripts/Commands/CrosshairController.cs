@@ -4,12 +4,16 @@ using UnityEngine;
 
 /// If the player touches a crosshair, the boss takes damage.
 public class CrosshairController : CommandObjectController {
+	public GameObject glowObj;
 	public int damage = 10;
 	private Rigidbody body;
+	private Rigidbody glowBody;
 
 	void Start() {
 		body = GetComponent<Rigidbody>();
 		body.angularVelocity = CommandObjectController.slowSpin;
+		glowBody = glowObj.GetComponent<Rigidbody>();
+		glowBody.angularVelocity = -CommandObjectController.slowSpin;
 	}
 
 	void OnTriggerEnter(Collider other) {
