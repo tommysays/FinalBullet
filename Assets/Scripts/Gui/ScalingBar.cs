@@ -40,9 +40,13 @@ public class ScalingBar : MonoBehaviour {
 		}
 	}
 
-	public void setCurrentValue(float cur) {
+	/// Setting the current value via this method will cause the bar to slide to this value.
+	public void setCurrentValue(float value) {
+		if (value > maxValue) {
+			value = maxValue;
+		}
 		lastValue = curValue;
-		curValue = cur;
+		curValue = value;
 		shouldSlide = true;
 		slideStartTime = Time.time;
 	}
