@@ -94,8 +94,8 @@ public class GameController : MonoBehaviour {
 
 		// Initialize characters.
 		characters = new List<Character>();
-		characters.Add(new Character());
-		characters.Add(new Character());
+		characters.Add(new Character().setMaxHp(150)); // Warrior gets more hp
+		characters.Add(new Character().setMovespeed(400f)); // Thief moves faster
 		characters.Add(new Character());
 		currentCharacterHpBar = thiefHpBarObj.GetComponent<ScalingBar>();
 		currentCharacterHpBar.maxValue = characters[1].hp;
@@ -147,6 +147,10 @@ public class GameController : MonoBehaviour {
 		} else {
 			if (delta >= turnDuration) {
 				turnAvailable = true;
+				// Expire all magic tokens left.
+				foreach (CommandObjectController controller in magicControllers) {
+					controller.despawn();
+				}
 			} else if (autoattackDelta > autoattackInterval) {
 				autoattackTime = Time.time;
 				randSpawner.spawn(crosshairPrefab, 1);
@@ -219,6 +223,7 @@ public class GameController : MonoBehaviour {
 				currentCharacterHpBar = mageHpBarObj.GetComponent<ScalingBar>();
 				break;
 		}
+		pointer.speed = characters[(int)currentCharacter].getMovespeed();
 		turnReset();
 	}
 
@@ -356,24 +361,29 @@ public class GameController : MonoBehaviour {
 		randSpawner.spawn(crosshairPrefab, 6);
 	}
 
+	/// Spawns items on the field. Thief spawns more.
 	public void handleItemClick() {
 		turnReset();
 		itemCooldown = itemCooldownMax;
 		float rand = Random.value;
+		int count = currentCharacter == CHARACTER_TYPE.THIEF ? 4 : 3;
 		if (rand < 0.5f) {
-			randSpawner.spawn(potionPrefab, 3);
+			randSpawner.spawn(potionPrefab, count);
 		} else {
-			randSpawner.spawn(bombPrefab, 3);
+			randSpawner.spawn(bombPrefab, count);
 		}
 	}
 
+	/// Spawns magic tokens on the field. Mage has reduced cooldown and fewer tokens.
 	public void handleMagicClick() {
 		turnReset();
-		magicCooldown = magicCooldownMax;
-		magicCounter = 0;
-		magicControllers = randSpawner.spawn(magicPrefab, magicCounterMax);
+		int mageBonus = currentCharacter == CHARACTER_TYPE.MAGE ? 1 : 0;
+		magicCooldown = magicCooldownMax - mageBonus;
+		magicCounter = mageBonus;
+		magicControllers = randSpawner.spawn(magicPrefab, magicCounterMax - mageBonus);
 	}
 
+	/// Signals that a magic token was touched. If all are activated, casts a spell.
 	public void magicActivation(MagicController controller) {
 		magicCounter++;
 		if (magicCounter >= magicCounterMax) {
@@ -400,7 +410,7 @@ public class GameController : MonoBehaviour {
 			particleController.destination = bulletSpawnerObj.transform.position;
 			controller.despawn();
 		}
-		damageBoss(60);
+		damageBoss(160);
 	}
 
 	private void castHeal() {
@@ -412,7 +422,7 @@ public class GameController : MonoBehaviour {
 			particleController.destination = warriorHpBarObj.transform.position;
 			controller.despawn();
 		}
-		healPlayer(20);
+		healPlayer(40);
 	}
 
 	public void crosshairAttack(Vector3 origin, int amount) {

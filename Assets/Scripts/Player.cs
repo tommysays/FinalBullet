@@ -9,8 +9,26 @@ public enum CHARACTER_TYPE {
 /// Keeps track of a character's HP.
 /// TODO Can add bonuses to damage, healing, cooldowns based on player "level".
 public class Character {
-	private const int MAX_HP = 100;
+	public int maxHp = 100;
 	public int hp = 100;
+
+	private float movespeed = 300f;
+
+	public Character setMaxHp(int maxHp) {
+		this.maxHp = maxHp;
+		this.hp = maxHp;
+		return this;
+	}
+
+	public Character setMovespeed(float movespeed) {
+		this.movespeed = movespeed;
+		return this;
+	}
+
+	public float getMovespeed() {
+		return movespeed;
+	}
+
 
 	public void damage(int amount) {
 		if (amount < 0) {
@@ -31,8 +49,8 @@ public class Character {
 			return;
 		}
 		hp += amount;
-		if (hp >= MAX_HP) {
-			hp = MAX_HP;
+		if (hp >= maxHp) {
+			hp = maxHp;
 		}
 	}
 }

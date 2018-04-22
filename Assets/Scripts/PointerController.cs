@@ -9,7 +9,7 @@ public class PointerController : MonoBehaviour {
 	public Sprite thiefSprite;
 	public Sprite mageSprite;
 	private Rigidbody body;
-	private float speed = 300f;
+	public float speed = 300f;
 
 	void Start () {
 		body = GetComponent<Rigidbody>();
