@@ -21,13 +21,13 @@ Item: (1 turn cooldown, i.e. every other))
 		Spawns potion bottles on the field. The player can hover over a potion to heal over time. Leaving the potion will stop healing.
 		Last potion heals instantly (reward for completing objective)
 	Bomb:
-		Spawns a few bombs on the field. Touch to clear bullets in a small radius around the bomb.
+		Spawns a few bombs on the field. Hover for some duration to activate bomb. Bombs can clear bullets in a small radius and damage the boss.
 		Last bomb clears a larger radius of bullets (reward for completing objective)
 
 Magic: (2 turn cooldown)
 	Spawns several pentagram points that must be touched in the correct order. If successful, a random spell will be cast.
 	Completing a spell should play a special animation and keep the game "paused" until it completes.
-	Slow:
+	Slow: // Maybe not?
 		Slows bullets and volley intervals for a few rounds
 	Fireball:
 		Large burst damage to the boss
@@ -35,3 +35,10 @@ Magic: (2 turn cooldown)
 	Heal:
 		Generous healing for player.
 		(Better healing than Potion, but high risk)
+
+The player controls 3 characters that cycle through each turn. Each character has its own health.
+If a character dies, it is removed from the cycle and the turn ends immediately. If all characters die, the player loses.
+Each character specializes in a command:
+Warrior - Generate more crosshairs with Attack command, and gain autoattacks faster.
+Thief - Generate more items (potions, bombs) with Item command.
+Mage - Generate FEWER magic tokens with Magic command. (Makes it easier to cast spells succesfully.)

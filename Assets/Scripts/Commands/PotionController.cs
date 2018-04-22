@@ -15,6 +15,8 @@ public class PotionController : CommandObjectController {
 	void Start() {
 		body = GetComponent<Rigidbody>();
 		glowBody = glowObj.GetComponent<Rigidbody>();
+
+		body.angularVelocity = slowSpin;
 		glowBody.angularVelocity = -fastSpin;
 	}
 

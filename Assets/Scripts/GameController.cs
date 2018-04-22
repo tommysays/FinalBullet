@@ -12,6 +12,7 @@ public class GameController : MonoBehaviour {
 	public GameObject damageParticleSystem;
 	public GameObject crosshairPrefab;
 	public GameObject potionPrefab;
+	public GameObject bombPrefab;
 	public GameObject magicPrefab;
 	public GameObject commandPanel;
 	public GameObject commandSelector;
@@ -182,13 +183,18 @@ public class GameController : MonoBehaviour {
 	}
 	public void handleAttackClick() {
 		turnStart();
-		randSpawner.spawn(crosshairPrefab, 9);
+		randSpawner.spawn(crosshairPrefab, 6);
 	}
 
 	public void handleItemClick() {
 		turnStart();
 		itemCooldown = itemCooldownMax;
-		randSpawner.spawn(potionPrefab, 5);
+		float rand = Random.value;
+		if (rand < 0.5f) {
+			randSpawner.spawn(potionPrefab, 3);
+		} else {
+			randSpawner.spawn(bombPrefab, 3);
+		}
 	}
 
 	public void handleMagicClick() {
@@ -248,6 +254,16 @@ public class GameController : MonoBehaviour {
 			GameObject particles = Instantiate(damageParticleSystem, origin, Quaternion.identity);
 			particles.GetComponent<DamageParticleController>().destination = bulletSpawnerObj.transform.position;
 		}
+		damageBoss(amount);
+	}
+
+	public void bombAttack(Vector3 origin, int amount) {
+		// TODO Clear bullets around bomb.
+		GameObject particles = Instantiate(damageParticleSystem, origin, Quaternion.identity);
+		DamageParticleController particleController = particles.GetComponent<DamageParticleController>();
+		particleController.setColor(Color.yellow);
+		particleController.destination = bulletSpawnerObj.transform.position;
+		particleController.travelTime = 0.75f;
 		damageBoss(amount);
 	}
 

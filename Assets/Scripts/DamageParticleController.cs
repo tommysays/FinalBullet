@@ -6,7 +6,7 @@ public class DamageParticleController : MonoBehaviour {
 	public GameObject particles;
 	public Vector3 start;
 	public Vector3 destination;
-	private float travelTime = 0.5f;
+	public float travelTime = 0.5f;
 	private float startTime;
 	private const float DEATH_DELAY = 2f;
 	

@@ -13,7 +13,6 @@ public class MagicController : CommandObjectController {
 	private SpriteRenderer glowSprite;
 	private SpriteRenderer whiteSprite;
 	private bool activated = false;
-	private bool despawning = false;
 	private float despawnStartTime;
 	private float despawnDuration = 0.25f;
 

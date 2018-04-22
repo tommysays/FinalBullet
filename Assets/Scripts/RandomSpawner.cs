@@ -28,10 +28,9 @@ public class RandomSpawner : MonoBehaviour {
 			float xSliceMax = xMin + xSliceWidth * i;
 			float x = Random.Range(xSliceMin, xSliceMax);
 			float z = Random.Range(zMin, zMax);
-			GameObject crosshair = Instantiate(obj, new Vector3(x, 1, z), Quaternion.identity);
-			crosshair.transform.rotation = Quaternion.Euler(0, Random.Range(0, 360), 0);
-			crosshair.GetComponent<Rigidbody>().angularVelocity = CommandObjectController.slowSpin;
-			CommandObjectController controller = crosshair.GetComponent<CommandObjectController>();
+			GameObject commandObj = Instantiate(obj, new Vector3(x, 1, z), Quaternion.identity);
+			commandObj.transform.rotation = Quaternion.Euler(0, Random.Range(0, 360), 0);
+			CommandObjectController controller = commandObj.GetComponent<CommandObjectController>();
 			controller.gameController = gameController;
 			controllers.Add(controller);
 		}
