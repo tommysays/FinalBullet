@@ -36,11 +36,18 @@ public class GameController : MonoBehaviour {
 
 	private float turnStartTime = 0f;
 	private float turnDuration = 10f;
+	/// Number of turns until Item command becomes available again.
 	private int itemCooldownMax = 1;
+	/// Current cooldown for Item command.
 	private int itemCooldown = 0;
+	/// Number of turns until Magic command becomes available again.
 	private int magicCooldownMax = 2;
+	/// Current cooldown for Magic command.
 	private int magicCooldown = 0;
+	/// Whether or not the player is taking their turn.
 	private bool takingTurn = false;
+	/// Whether or not the player can take their next turn.
+	private bool turnAvailable = false;
 
 	/// Keeps track of how many magic tokens have been activated
 	private int magicCounter = 0;
