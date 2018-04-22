@@ -5,6 +5,7 @@ using UnityEngine;
 /// Game cycle for battles.
 public class GameController : MonoBehaviour {
 	public GameObject bossHpBarObj;
+	public GameObject playerHpBarObj;
 	public GameObject turnBarObj;
 	public GameObject randomSpawnerObj;
 	public GameObject bulletSpawnerObj;
@@ -18,6 +19,7 @@ public class GameController : MonoBehaviour {
 	private Player player;
 	private Boss boss;
 	private ScalingBar bossHpBar;
+	private ScalingBar playerHpBar;
 	private ScalingBar turnBar;
 	private RandomSpawner randSpawner;
 	private int crosshairCounter = 0;
@@ -40,6 +42,10 @@ public class GameController : MonoBehaviour {
 		bossHpBar = bossHpBarObj.GetComponent<ScalingBar>();
 		bossHpBar.maxValue = boss.hp;
 		bossHpBar.curValue = boss.hp;
+
+		playerHpBar = playerHpBarObj.GetComponent<ScalingBar>();
+		playerHpBar.maxValue = player.hp;
+		playerHpBar.curValue = player.hp;
 
 		turnBar = turnBarObj.GetComponent<ScalingBar>();
 		turnBar.maxValue = turnDuration;
@@ -114,6 +120,7 @@ public class GameController : MonoBehaviour {
 
 	public void damagePlayer(int amount) {
 		player.damage(amount);
+		playerHpBar.setCurrentValue(player.hp);
 		Debug.Log("Player is now at " + player.hp + " hp.");
 		if (player.hp == 0) {
 			Debug.Log("Player is ded :(");
@@ -122,6 +129,7 @@ public class GameController : MonoBehaviour {
 
 	public void healPlayer(int amount) {
 		player.heal(amount);
+		playerHpBar.setCurrentValue(player.hp);
 		Debug.Log("Player is now at " + player.hp + " hp.");
 	}
 }

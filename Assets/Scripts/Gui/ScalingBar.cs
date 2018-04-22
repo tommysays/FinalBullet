@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class ScalingBar : MonoBehaviour {
-	public const float SLIDE_SPEED = 0.5f;
+	public float slideSpeed = 0.5f;
 	public GameObject fullBar;
 	public GameObject currentBar;
 	private RectTransform currentRect;
@@ -27,7 +27,7 @@ public class ScalingBar : MonoBehaviour {
 	
 	void Update() {
 		if (shouldSlide) {
-			float ratio = (Time.time - slideStartTime) / SLIDE_SPEED;
+			float ratio = (Time.time - slideStartTime) / slideSpeed;
 			float width = ((lastValue * (1 - ratio) + curValue * ratio) / maxValue) * maxWidth;
 			if (ratio > 1) {
 				shouldSlide = false;
