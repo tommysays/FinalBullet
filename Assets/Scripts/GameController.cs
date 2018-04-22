@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 /// Game cycle for battles.
 public class GameController : MonoBehaviour {
@@ -26,7 +27,9 @@ public class GameController : MonoBehaviour {
 	public GameObject warriorPanel;
 	public GameObject thiefPanel;
 	public GameObject magePanel;
+	public GameObject bossImageObj;
 	private Boss boss;
+	private ColorFlasher bossFlasher;
 	private ScalingBar bossHpBar;
 	private ScalingBar currentCharacterHpBar;
 	private ScalingBar turnBar;
@@ -81,16 +84,19 @@ public class GameController : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-		characters = new List<Character>();
-		characters.Add(new Character());
-		characters.Add(new Character());
-		characters.Add(new Character());
-		boss = new Boss();
 
+		// Initialize boss.
+		boss = new Boss();
+		bossFlasher = bossImageObj.GetComponent<ColorFlasher>();
 		bossHpBar = bossHpBarObj.GetComponent<ScalingBar>();
 		bossHpBar.maxValue = boss.hp;
 		bossHpBar.curValue = boss.hp;
 
+		// Initialize characters.
+		characters = new List<Character>();
+		characters.Add(new Character());
+		characters.Add(new Character());
+		characters.Add(new Character());
 		currentCharacterHpBar = thiefHpBarObj.GetComponent<ScalingBar>();
 		currentCharacterHpBar.maxValue = characters[1].hp;
 		currentCharacterHpBar.curValue = characters[1].hp;
@@ -101,21 +107,21 @@ public class GameController : MonoBehaviour {
 		currentCharacterHpBar.maxValue = characters[0].hp;
 		currentCharacterHpBar.curValue = characters[0].hp;
 
-		turnBar = turnBarObj.GetComponent<ScalingBar>();
-		turnBar.maxValue = turnDuration;
-		turnBar.curValue = 0;
 
 		randSpawner = randomSpawnerObj.GetComponent<RandomSpawner>();
 
+		// Initialize GUI things.
 		attackButtonPosition =  attackButton.GetComponent<RectTransform>().anchoredPosition;
 		itemButtonPosition =  itemButton.GetComponent<RectTransform>().anchoredPosition;
 		magicButtonPosition =  magicButton.GetComponent<RectTransform>().anchoredPosition;
 		warriorPanelPosition = warriorPanel.GetComponent<RectTransform>().anchoredPosition;
 		thiefPanelPosition = thiefPanel.GetComponent<RectTransform>().anchoredPosition;
 		magePanelPosition = magePanel.GetComponent<RectTransform>().anchoredPosition;
-
 		commandSelectorRect = commandSelector.GetComponent<RectTransform>();
 		characterSelectorRect = characterSelector.GetComponent<RectTransform>();
+		turnBar = turnBarObj.GetComponent<ScalingBar>();
+		turnBar.maxValue = turnDuration;
+		turnBar.curValue = 0;
 
 		pointer = FindObjectOfType<PointerController>();
 		pointer.setCharacter(currentCharacter);
@@ -460,6 +466,7 @@ public class GameController : MonoBehaviour {
 	}
 
 	public void damageBoss(int amount) {
+		bossFlasher.flashColor(Color.red);
 		boss.damage(amount);
 		bossHpBar.setCurrentValue(boss.hp);
 		Debug.Log("Boss is now at " + boss.hp + " hp.");
