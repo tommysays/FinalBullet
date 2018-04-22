@@ -192,7 +192,7 @@ public class GameController : MonoBehaviour {
 		itemCooldown = itemCooldownMax;
 		float rand = Random.value;
 		if (rand < 0.5f) {
-			randSpawner.spawn(bombPrefab, 3);
+			randSpawner.spawn(potionPrefab, 3);
 		} else {
 			randSpawner.spawn(bombPrefab, 3);
 		}
@@ -265,14 +265,8 @@ public class GameController : MonoBehaviour {
 		particleController.setColor(Color.yellow);
 		particleController.destination = bulletSpawnerObj.transform.position;
 		particleController.travelTime = 0.75f;
-		GameObject explosion = Instantiate(explosionParticles, origin, explosionParticles.transform.rotation);
-		ParticleController explosionController = explosion.GetComponent<ParticleController>();
-		explosionController.setColor(Color.yellow);
-		explosionController.play();
-		explosion = Instantiate(explosionParticles, origin, explosionParticles.transform.rotation);
-		explosionController = explosion.GetComponent<ParticleController>();
-		explosionController.setColor(new Color(1f, 0.5f, 0));
-		explosionController.play();
+		explode(origin, Color.yellow);
+		explode(origin, new Color(1f, 0.5f, 0f));
 		damageBoss(amount);
 	}
 
@@ -293,6 +287,13 @@ public class GameController : MonoBehaviour {
 		controller = particles.GetComponent<DamageParticleController>();
 		controller.destination = bulletSpawnerObj.transform.position;
 		controller.setColor(new Color(1f, 1f, 0f));
+	}
+
+	public void explode(Vector3 origin, Color color) {
+		GameObject explosion = Instantiate(explosionParticles, origin, explosionParticles.transform.rotation);
+		ParticleController explosionController = explosion.GetComponent<ParticleController>();
+		explosionController.setColor(color);
+		explosionController.play();
 	}
 
 	public void damageBoss(int amount) {

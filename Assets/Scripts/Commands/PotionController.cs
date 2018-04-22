@@ -32,11 +32,13 @@ public class PotionController : CommandObjectController {
 			touchDuration += Time.deltaTime;
 			if (touchDuration > healDelay) {
 				touchDuration = 0f;
-				gameController.healPlayer(healthPerTick);
 				maxHealAmount -= healthPerTick;
 				if (maxHealAmount < 0) {
-					// TODO Visual indication that the potion is spent.
-					Destroy(this.gameObject);
+					gameController.explode(transform.position, Color.green);
+					gameController.healPlayer(healthPerTick * 3);
+					despawn();
+				} else {
+					gameController.healPlayer(healthPerTick);
 				}
 			}
 		}
@@ -51,5 +53,6 @@ public class PotionController : CommandObjectController {
 
 	public override void despawn() {
 		// TODO
+		Destroy(this.gameObject);
 	}
 }
