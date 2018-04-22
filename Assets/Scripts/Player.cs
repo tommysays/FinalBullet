@@ -1,8 +1,14 @@
 ﻿using UnityEngine;
 
-/// Keeps track of the player's HP.
+public enum CHARACTER_TYPE {
+	WARRIOR = 0,
+	THIEF = 1,
+	MAGE = 2
+}
+
+/// Keeps track of a character's HP.
 /// TODO Can add bonuses to damage, healing, cooldowns based on player "level".
-public class Player {
+public class Character {
 	private const int MAX_HP = 100;
 	public int hp = 100;
 

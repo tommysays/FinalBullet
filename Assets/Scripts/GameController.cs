@@ -5,7 +5,9 @@ using UnityEngine;
 /// Game cycle for battles.
 public class GameController : MonoBehaviour {
 	public GameObject bossHpBarObj;
-	public GameObject playerHpBarObj;
+	public GameObject warriorHpBarObj;
+	public GameObject thiefHpBarObj;
+	public GameObject mageHpBarObj;
 	public GameObject turnBarObj;
 	public GameObject randomSpawnerObj;
 	public GameObject bulletSpawnerObj;
@@ -17,15 +19,19 @@ public class GameController : MonoBehaviour {
 	public GameObject magicPrefab;
 	public GameObject commandPanel;
 	public GameObject commandSelector;
+	public GameObject characterSelector;
 	public GameObject attackButton;
 	public GameObject itemButton;
 	public GameObject magicButton;
-	private Player player;
+	public GameObject warriorPanel;
+	public GameObject thiefPanel;
+	public GameObject magePanel;
 	private Boss boss;
 	private ScalingBar bossHpBar;
-	private ScalingBar playerHpBar;
+	private ScalingBar currentCharacterHpBar;
 	private ScalingBar turnBar;
 	private RandomSpawner randSpawner;
+	private PointerController pointer;
 	private int crosshairCounter = 0;
 	/// When the counter reaches this limit, the next crosshair attack deals extra damage.
 	private int crosshairStrike = 2;
@@ -55,24 +61,45 @@ public class GameController : MonoBehaviour {
 	private int magicCounterMax = 4;
 	private List<CommandObjectController> magicControllers = new List<CommandObjectController>();
 
+	/// 0 = command selector, 1 = character selector.
+	private int selectorIndex = 0;
+	/// 0 = attack, 1 = item, 2 = magic
 	private int commandSelectorIndex = 0;
+	/// 0 = warrior, 1 = thief, 2 = mage
+	private int characterSelectorIndex = 0;
 	private Vector2 attackButtonPosition;
 	private Vector2 itemButtonPosition;
 	private Vector2 magicButtonPosition;
+	private Vector2 warriorPanelPosition;
+	private Vector2 thiefPanelPosition;
+	private Vector2 magePanelPosition;
 	private RectTransform commandSelectorRect;
+	private RectTransform characterSelectorRect;
+
+	private CHARACTER_TYPE currentCharacter = CHARACTER_TYPE.WARRIOR;
+	private List<Character> characters;
 
 	// Use this for initialization
 	void Start () {
-		player = new Player();
+		characters = new List<Character>();
+		characters.Add(new Character());
+		characters.Add(new Character());
+		characters.Add(new Character());
 		boss = new Boss();
 
 		bossHpBar = bossHpBarObj.GetComponent<ScalingBar>();
 		bossHpBar.maxValue = boss.hp;
 		bossHpBar.curValue = boss.hp;
 
-		playerHpBar = playerHpBarObj.GetComponent<ScalingBar>();
-		playerHpBar.maxValue = player.hp;
-		playerHpBar.curValue = player.hp;
+		currentCharacterHpBar = thiefHpBarObj.GetComponent<ScalingBar>();
+		currentCharacterHpBar.maxValue = characters[1].hp;
+		currentCharacterHpBar.curValue = characters[1].hp;
+		currentCharacterHpBar = mageHpBarObj.GetComponent<ScalingBar>();
+		currentCharacterHpBar.maxValue = characters[2].hp;
+		currentCharacterHpBar.curValue = characters[2].hp;
+		currentCharacterHpBar = warriorHpBarObj.GetComponent<ScalingBar>();
+		currentCharacterHpBar.maxValue = characters[0].hp;
+		currentCharacterHpBar.curValue = characters[0].hp;
 
 		turnBar = turnBarObj.GetComponent<ScalingBar>();
 		turnBar.maxValue = turnDuration;
@@ -83,7 +110,15 @@ public class GameController : MonoBehaviour {
 		attackButtonPosition =  attackButton.GetComponent<RectTransform>().anchoredPosition;
 		itemButtonPosition =  itemButton.GetComponent<RectTransform>().anchoredPosition;
 		magicButtonPosition =  magicButton.GetComponent<RectTransform>().anchoredPosition;
+		warriorPanelPosition = warriorPanel.GetComponent<RectTransform>().anchoredPosition;
+		thiefPanelPosition = thiefPanel.GetComponent<RectTransform>().anchoredPosition;
+		magePanelPosition = magePanel.GetComponent<RectTransform>().anchoredPosition;
+
 		commandSelectorRect = commandSelector.GetComponent<RectTransform>();
+		characterSelectorRect = characterSelector.GetComponent<RectTransform>();
+
+		pointer = FindObjectOfType<PointerController>();
+		pointer.setCharacter(currentCharacter);
 	}
 	
 	// Update is called once per frame
@@ -93,72 +128,188 @@ public class GameController : MonoBehaviour {
 		turnBar.setCurrentValue(delta);
 		if (takingTurn) {
 			if (Input.GetButtonDown("Up")) {
-				moveSelector(true);
+				moveSelector(0);
 			} else if (Input.GetButtonDown("Down")) {
-				moveSelector(false);
+				moveSelector(1);
+			} else if (Input.GetButtonDown("Left")) {
+				moveSelector(2);
+			} else if (Input.GetButtonDown("Right")) {
+				moveSelector(3);
 			} else if (Input.GetButtonDown("Submit")) {
-				switch (commandSelectorIndex) {
-					case 0:
-						handleAttackClick();
-						break;
-					case 1:
-						handleItemClick();
-						break;
-					case 2:
-						handleMagicClick();
-						break;
-				}
-				commandSelectorIndex = 0;
+				evaluateSubmit();
 			}
 		} else {
 			if (delta >= turnDuration) {
-				nextTurn();
+				turnAvailable = true;
 			} else if (autoattackDelta > autoattackInterval) {
 				autoattackTime = Time.time;
 				randSpawner.spawn(crosshairPrefab, 1);
 			}
 		}
+		if (turnAvailable && !takingTurn && Input.GetButtonDown("Submit")) {
+			turnAvailable = false;
+			nextTurn();
+		}
 	}
 
-	private void moveSelector(bool up = false) {
-		if (up) {
+	private void evaluateSubmit() {
+		if (selectorIndex == 0) {
 			switch (commandSelectorIndex) {
 				case 0:
+					handleAttackClick();
+					disableSelectors();
 					break;
 				case 1:
-					commandSelectorRect.anchoredPosition = attackButtonPosition;
-					commandSelectorIndex = 0;
+					handleItemClick();
+					disableSelectors();
 					break;
 				case 2:
-					if (itemButton.activeInHierarchy) {
-						commandSelectorRect.anchoredPosition = itemButtonPosition;
-						commandSelectorIndex = 1;
-					} else {
-						commandSelectorRect.anchoredPosition = attackButtonPosition;
-						commandSelectorIndex = 0;
-					}
+					handleMagicClick();
+					disableSelectors();
 					break;
 			}
 		} else {
-			switch (commandSelectorIndex) {
+			switch (characterSelectorIndex) {
 				case 0:
-					if (itemButton.activeInHierarchy) {
-						commandSelectorRect.anchoredPosition = itemButtonPosition;
-						commandSelectorIndex = 1;
-					} else if (magicButton.activeInHierarchy) {
-						commandSelectorRect.anchoredPosition = magicButtonPosition;
-						commandSelectorIndex = 2;
+					if (currentCharacter != CHARACTER_TYPE.WARRIOR) {
+						changeCharacter(CHARACTER_TYPE.WARRIOR);
+						disableSelectors();
+					} else {
+						// TODO Play brr brr chime
 					}
 					break;
 				case 1:
-					if (magicButton.activeInHierarchy) {
-						commandSelectorRect.anchoredPosition = magicButtonPosition;
-						commandSelectorIndex = 2;
+					if (currentCharacter != CHARACTER_TYPE.THIEF) {
+						changeCharacter(CHARACTER_TYPE.THIEF);
+						disableSelectors();
+					} else {
+						// TODO Play brr brr chime
 					}
 					break;
 				case 2:
+					if (currentCharacter != CHARACTER_TYPE.MAGE) {
+						changeCharacter(CHARACTER_TYPE.MAGE);
+						disableSelectors();
+					} else {
+						// TODO Play brr brr chime
+					}
 					break;
 			}
+		}
+	}
+
+	/// Changes character and starts the next turn.
+	private void changeCharacter(CHARACTER_TYPE character) {
+		currentCharacter = character;
+		pointer.setCharacter(character);
+		switch (character) {
+			case CHARACTER_TYPE.WARRIOR:
+				currentCharacterHpBar = warriorHpBarObj.GetComponent<ScalingBar>();
+				break;
+			case CHARACTER_TYPE.THIEF:
+				currentCharacterHpBar = thiefHpBarObj.GetComponent<ScalingBar>();
+				break;
+			case CHARACTER_TYPE.MAGE:
+				currentCharacterHpBar = mageHpBarObj.GetComponent<ScalingBar>();
+				break;
+		}
+		turnReset();
+	}
+
+	private void disableSelectors() {
+		commandSelectorIndex = 0;
+		commandSelector.SetActive(false);
+		characterSelector.SetActive(false);
+		characterSelector.SetActive(false);
+	}
+
+	private void moveSelector(int direction) {
+		if (direction == 0) {
+			if (selectorIndex == 0) {
+				switch (commandSelectorIndex) {
+					case 0:
+						break;
+					case 1:
+						commandSelectorRect.anchoredPosition = attackButtonPosition;
+						commandSelectorIndex = 0;
+						break;
+					case 2:
+						if (itemButton.activeInHierarchy) {
+							commandSelectorRect.anchoredPosition = itemButtonPosition;
+							commandSelectorIndex = 1;
+						} else {
+							commandSelectorRect.anchoredPosition = attackButtonPosition;
+							commandSelectorIndex = 0;
+						}
+						break;
+				}
+			} else {
+				switch (characterSelectorIndex) {
+					case 1:
+						if (characters[(int)CHARACTER_TYPE.WARRIOR].hp > 0) {
+							characterSelectorRect.anchoredPosition = warriorPanelPosition;
+							characterSelectorIndex = 0;
+						}
+						break;
+					case 2:
+						if (characters[(int)CHARACTER_TYPE.THIEF].hp > 0) {
+							characterSelectorRect.anchoredPosition = thiefPanelPosition;
+							characterSelectorIndex = 1;
+						} else if (characters[(int)CHARACTER_TYPE.WARRIOR].hp > 0) {
+							characterSelectorRect.anchoredPosition = warriorPanelPosition;
+							characterSelectorIndex = 0;
+						}
+						break;
+				}
+			}
+		} else if (direction == 1) {
+			if (selectorIndex == 0) {
+				switch (commandSelectorIndex) {
+					case 0:
+						if (itemButton.activeInHierarchy) {
+							commandSelectorRect.anchoredPosition = itemButtonPosition;
+							commandSelectorIndex = 1;
+						} else if (magicButton.activeInHierarchy) {
+							commandSelectorRect.anchoredPosition = magicButtonPosition;
+							commandSelectorIndex = 2;
+						}
+						break;
+					case 1:
+						if (magicButton.activeInHierarchy) {
+							commandSelectorRect.anchoredPosition = magicButtonPosition;
+							commandSelectorIndex = 2;
+						}
+						break;
+					case 2:
+						break;
+				}
+			} else {
+				switch (characterSelectorIndex) {
+					case 0:
+						if (characters[(int)CHARACTER_TYPE.THIEF].hp > 0) {
+							characterSelectorRect.anchoredPosition = thiefPanelPosition;
+							characterSelectorIndex = 1;
+						} else if (characters[(int)CHARACTER_TYPE.MAGE].hp > 0) {
+							characterSelectorRect.anchoredPosition = magePanelPosition;
+							characterSelectorIndex = 2;
+						}
+						break;
+					case 1:
+						if (characters[(int)CHARACTER_TYPE.MAGE].hp > 0) {
+							characterSelectorRect.anchoredPosition = magePanelPosition;
+							characterSelectorIndex = 2;
+						}
+						break;
+				}
+			}
+		} else if (direction == 2) {
+			selectorIndex = 0;
+			commandSelector.SetActive(true);
+			characterSelector.SetActive(false);
+		} else {
+			selectorIndex = 1;
+			commandSelector.SetActive(false);
+			characterSelector.SetActive(true);
 		}
 	}
 
@@ -167,6 +318,7 @@ public class GameController : MonoBehaviour {
 		takingTurn = true;
 		Time.timeScale = 0;
 		commandPanel.SetActive(true);
+		commandSelector.SetActive(true);
 		commandSelectorRect.anchoredPosition = attackButtonPosition;
 		itemButton.SetActive(itemCooldown-- <= 0);
 		magicButton.SetActive(magicCooldown-- <= 0);
@@ -183,19 +335,23 @@ public class GameController : MonoBehaviour {
 		}
 	}
 
-	private void turnStart() {
+	/// Resets things in preparation for the next turn.
+	private void turnReset() {
+		commandSelectorIndex = 0;
+		selectorIndex = 0;
 		commandPanel.SetActive(false);
 		turnStartTime = Time.time;
 		takingTurn = false;
+		turnAvailable = false;
 		Time.timeScale = 1f;
 	}
 	public void handleAttackClick() {
-		turnStart();
+		turnReset();
 		randSpawner.spawn(crosshairPrefab, 6);
 	}
 
 	public void handleItemClick() {
-		turnStart();
+		turnReset();
 		itemCooldown = itemCooldownMax;
 		float rand = Random.value;
 		if (rand < 0.5f) {
@@ -206,7 +362,7 @@ public class GameController : MonoBehaviour {
 	}
 
 	public void handleMagicClick() {
-		turnStart();
+		turnReset();
 		magicCooldown = magicCooldownMax;
 		magicCounter = 0;
 		magicControllers = randSpawner.spawn(magicPrefab, magicCounterMax);
@@ -247,7 +403,7 @@ public class GameController : MonoBehaviour {
 			GameObject particles = Instantiate(damageParticleSystem, controller.transform.position, Quaternion.identity);
 			DamageParticleController particleController = particles.GetComponent<DamageParticleController>();
 			particleController.setColor(Color.green);
-			particleController.destination = playerHpBarObj.transform.position;
+			particleController.destination = warriorHpBarObj.transform.position;
 			controller.despawn();
 		}
 		healPlayer(20);
@@ -310,17 +466,19 @@ public class GameController : MonoBehaviour {
 	}
 
 	public void damagePlayer(int amount) {
-		player.damage(amount);
-		playerHpBar.setCurrentValue(player.hp);
-		Debug.Log("Player is now at " + player.hp + " hp.");
-		if (player.hp == 0) {
+		Character character = characters[(int)currentCharacter];
+		character.damage(amount);
+		currentCharacterHpBar.setCurrentValue(character.hp);
+		Debug.Log("Player is now at " + character.hp + " hp.");
+		if (character.hp == 0) {
 			Debug.Log("Player is ded :(");
 		}
 	}
 
 	public void healPlayer(int amount) {
-		player.heal(amount);
-		playerHpBar.setCurrentValue(player.hp);
-		Debug.Log("Player is now at " + player.hp + " hp.");
+		Character character = characters[(int)currentCharacter];
+		character.heal(amount);
+		currentCharacterHpBar.setCurrentValue(character.hp);
+		Debug.Log("Player is now at " + character.hp + " hp.");
 	}
 }
