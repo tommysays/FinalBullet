@@ -6,9 +6,11 @@ using UnityEngine;
 public class GameController : MonoBehaviour {
 	public GameObject bossHpBarObj;
 	public GameObject turnBarObj;
-	public GameObject crosshairSpawnerObj;
+	public GameObject randomSpawnerObj;
 	public GameObject bulletSpawnerObj;
 	public GameObject damageParticleSystem;
+	public GameObject crosshairPrefab;
+	public GameObject potionPrefab;
 	public GameObject commandPanel;
 	public GameObject attackButton;
 	public GameObject itemButton;
@@ -17,7 +19,7 @@ public class GameController : MonoBehaviour {
 	private Boss boss;
 	private ScalingBar bossHpBar;
 	private ScalingBar turnBar;
-	private CrosshairSpawner crosshairSpawner;
+	private RandomSpawner randSpawner;
 	private int crosshairCounter = 0;
 	/// When the counter reaches this limit, the next crosshair attack deals extra damage.
 	private int crosshairStrike = 2;
@@ -28,6 +30,7 @@ public class GameController : MonoBehaviour {
 	private int itemCooldown = 0;
 	private int magicCooldownMax = 2;
 	private int magicCooldown = 0;
+	private bool takingTurn = false;
 
 	// Use this for initialization
 	void Start () {
@@ -42,19 +45,20 @@ public class GameController : MonoBehaviour {
 		turnBar.maxValue = turnDuration;
 		turnBar.curValue = 0;
 
-		crosshairSpawner = crosshairSpawnerObj.GetComponent<CrosshairSpawner>();
+		randSpawner = randomSpawnerObj.GetComponent<RandomSpawner>();
 	}
 	
 	// Update is called once per frame
 	void Update () {
 		float delta = Time.time - turnStartTime;
 		turnBar.setCurrentValue(delta);
-		if (delta >= turnDuration) {
+		if (!takingTurn && delta >= turnDuration) {
 			nextTurn();
 		}
 	}
 
 	private void nextTurn() {
+		takingTurn = true;
 		commandPanel.SetActive(true);
 		itemButton.SetActive(itemCooldown-- <= 0);
 		magicButton.SetActive(magicCooldown-- <= 0);
@@ -69,19 +73,22 @@ public class GameController : MonoBehaviour {
 	public void handleAttackClick() {
 		commandPanel.SetActive(false);
 		turnStartTime = Time.time;
-		crosshairSpawner.spawnAttack(9);
+		takingTurn = false;
+		randSpawner.spawn(crosshairPrefab, 9);
 	}
 
 	public void handleItemClick() {
 		commandPanel.SetActive(false);
 		turnStartTime = Time.time;
+		takingTurn = false;
 		itemCooldown = itemCooldownMax;
-		Debug.Log("Item was selected");
+		randSpawner.spawn(potionPrefab, 5);
 	}
 
 	public void handleMagicClick() {
 		commandPanel.SetActive(false);
 		turnStartTime = Time.time;
+		takingTurn = false;
 		magicCooldown = magicCooldownMax;
 		Debug.Log("Magic was selected");
 	}
@@ -107,6 +114,7 @@ public class GameController : MonoBehaviour {
 
 	public void damagePlayer(int amount) {
 		player.damage(amount);
+		Debug.Log("Player is now at " + player.hp + " hp.");
 		if (player.hp == 0) {
 			Debug.Log("Player is ded :(");
 		}
@@ -114,5 +122,6 @@ public class GameController : MonoBehaviour {
 
 	public void healPlayer(int amount) {
 		player.heal(amount);
+		Debug.Log("Player is now at " + player.hp + " hp.");
 	}
 }

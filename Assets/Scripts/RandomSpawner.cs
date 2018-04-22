@@ -2,9 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CrosshairSpawner : MonoBehaviour {
+public class RandomSpawner : MonoBehaviour {
 	public GameController gameController;
-	public GameObject crosshairPrefab;
 	public float xMin;
 	public float xMax;
 	public float zMin;
@@ -18,8 +17,8 @@ public class CrosshairSpawner : MonoBehaviour {
 		xDelta = xMax - xMin;
 	}
 
-	/// Spawns a given number of crosshair attack targets.
-	public void spawnAttack(int count) {
+	/// Spawns a given number of objects in a somwhat uniform distribution.
+	public void spawn(GameObject obj, int count) {
 		// We want this to be randomized, but also somewhat uniformly distributed.
 		// To do this, we split the field into count columns before placing one in each.
 		float xSliceWidth = xDelta / count;
@@ -28,10 +27,10 @@ public class CrosshairSpawner : MonoBehaviour {
 			float xSliceMax = xMin + xSliceWidth * i;
 			float x = Random.Range(xSliceMin, xSliceMax);
 			float z = Random.Range(zMin, zMax);
-			GameObject crosshair = Instantiate(crosshairPrefab, new Vector3(x, 1, z), Quaternion.identity);
+			GameObject crosshair = Instantiate(obj, new Vector3(x, 1, z), Quaternion.identity);
 			crosshair.transform.rotation = Quaternion.Euler(0, Random.Range(0, 360), 0);
-			crosshair.GetComponent<Rigidbody>().angularVelocity = new Vector3(0, 2.5f, 0);
-			crosshair.GetComponent<CrosshairController>().gameController = gameController;
+			crosshair.GetComponent<Rigidbody>().angularVelocity = CommandObjectController.slowSpin;
+			crosshair.GetComponent<CommandObjectController>().gameController = gameController;
 		}
 	}
 }
