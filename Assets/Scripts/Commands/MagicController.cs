@@ -36,7 +36,6 @@ public class MagicController : CommandObjectController {
 			float ratio = (Time.time - despawnStartTime) / despawnDuration;
 			if (ratio > 1) {
 				ratio = 1;
-				despawning = false;
 				Destroy(this.gameObject, 0.1f);
 			}
 
@@ -55,7 +54,7 @@ public class MagicController : CommandObjectController {
 	}
 	
 	void OnTriggerEnter(Collider other) {
-		if (other.tag == "Pointer" && !activated) {
+		if (other.tag == "Pointer" && !activated && !despawning) {
 			body.angularVelocity = fastSpin;
 			glowObj.SetActive(true);
 			whiteGlowObj.SetActive(false);
@@ -64,9 +63,11 @@ public class MagicController : CommandObjectController {
 		}
 	}
 
-	public void despawn() {
-		despawning = true;
-		glowObj.GetComponent<RainbowSprite>().shouldChange = false;
-		despawnStartTime = Time.time;
+	public override void despawn() {
+		if (!despawning) {
+			despawning = true;
+			glowObj.GetComponent<RainbowSprite>().shouldChange = false;
+			despawnStartTime = Time.time;
+		}
 	}
 }

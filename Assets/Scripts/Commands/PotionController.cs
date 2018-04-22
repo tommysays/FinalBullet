@@ -46,4 +46,8 @@ public class PotionController : CommandObjectController {
 			glowObj.SetActive(false);
 		}
 	}
+
+	public override void despawn() {
+		// TODO
+	}
 }

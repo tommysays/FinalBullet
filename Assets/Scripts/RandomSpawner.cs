@@ -18,7 +18,8 @@ public class RandomSpawner : MonoBehaviour {
 	}
 
 	/// Spawns a given number of objects in a somwhat uniform distribution.
-	public void spawn(GameObject obj, int count) {
+	public List<CommandObjectController> spawn(GameObject obj, int count) {
+		List<CommandObjectController> controllers = new List<CommandObjectController>();
 		// We want this to be randomized, but also somewhat uniformly distributed.
 		// To do this, we split the field into count columns before placing one in each.
 		float xSliceWidth = xDelta / count;
@@ -30,7 +31,10 @@ public class RandomSpawner : MonoBehaviour {
 			GameObject crosshair = Instantiate(obj, new Vector3(x, 1, z), Quaternion.identity);
 			crosshair.transform.rotation = Quaternion.Euler(0, Random.Range(0, 360), 0);
 			crosshair.GetComponent<Rigidbody>().angularVelocity = CommandObjectController.slowSpin;
-			crosshair.GetComponent<CommandObjectController>().gameController = gameController;
+			CommandObjectController controller = crosshair.GetComponent<CommandObjectController>();
+			controller.gameController = gameController;
+			controllers.Add(controller);
 		}
+		return controllers;
 	}
 }

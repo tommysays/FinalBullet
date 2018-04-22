@@ -13,4 +13,8 @@ public class CrosshairController : CommandObjectController {
 			Destroy(this.gameObject);
 		}
 	}
+
+	public override void despawn() {
+		// TODO
+	}
 }

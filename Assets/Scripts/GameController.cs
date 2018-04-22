@@ -14,6 +14,7 @@ public class GameController : MonoBehaviour {
 	public GameObject potionPrefab;
 	public GameObject magicPrefab;
 	public GameObject commandPanel;
+	public GameObject commandSelector;
 	public GameObject attackButton;
 	public GameObject itemButton;
 	public GameObject magicButton;
@@ -43,7 +44,13 @@ public class GameController : MonoBehaviour {
 	private int magicCounter = 0;
 	/// How many magic tokens need to be activated to cast a spell.
 	private int magicCounterMax = 4;
-	private List<MagicController> magicControllers;
+	private List<CommandObjectController> magicControllers = new List<CommandObjectController>();
+
+	private int commandSelectorIndex = 0;
+	private Vector2 attackButtonPosition;
+	private Vector2 itemButtonPosition;
+	private Vector2 magicButtonPosition;
+	private RectTransform commandSelectorRect;
 
 	// Use this for initialization
 	void Start () {
@@ -63,6 +70,11 @@ public class GameController : MonoBehaviour {
 		turnBar.curValue = 0;
 
 		randSpawner = randomSpawnerObj.GetComponent<RandomSpawner>();
+
+		attackButtonPosition =  attackButton.GetComponent<RectTransform>().anchoredPosition;
+		itemButtonPosition =  itemButton.GetComponent<RectTransform>().anchoredPosition;
+		magicButtonPosition =  magicButton.GetComponent<RectTransform>().anchoredPosition;
+		commandSelectorRect = commandSelector.GetComponent<RectTransform>();
 	}
 	
 	// Update is called once per frame
@@ -70,13 +82,73 @@ public class GameController : MonoBehaviour {
 		float delta = Time.time - turnStartTime;
 		float autoattackDelta = Time.time - autoattackTime;
 		turnBar.setCurrentValue(delta);
-		if (!takingTurn && delta >= turnDuration) {
-			nextTurn();
-		}
-		if (!takingTurn) {
-			if (autoattackDelta > autoattackInterval) {
+		if (takingTurn) {
+			if (Input.GetButtonDown("Up")) {
+				moveSelector(true);
+			} else if (Input.GetButtonDown("Down")) {
+				moveSelector(false);
+			} else if (Input.GetButtonDown("Submit")) {
+				switch (commandSelectorIndex) {
+					case 0:
+						handleAttackClick();
+						break;
+					case 1:
+						handleItemClick();
+						break;
+					case 2:
+						handleMagicClick();
+						break;
+				}
+				commandSelectorIndex = 0;
+			}
+		} else {
+			if (delta >= turnDuration) {
+				nextTurn();
+			} else if (autoattackDelta > autoattackInterval) {
 				autoattackTime = Time.time;
 				randSpawner.spawn(crosshairPrefab, 1);
+			}
+		}
+	}
+
+	private void moveSelector(bool up = false) {
+		if (up) {
+			switch (commandSelectorIndex) {
+				case 0:
+					break;
+				case 1:
+					commandSelectorRect.anchoredPosition = attackButtonPosition;
+					commandSelectorIndex = 0;
+					break;
+				case 2:
+					if (itemButton.activeInHierarchy) {
+						commandSelectorRect.anchoredPosition = itemButtonPosition;
+						commandSelectorIndex = 1;
+					} else {
+						commandSelectorRect.anchoredPosition = attackButtonPosition;
+						commandSelectorIndex = 0;
+					}
+					break;
+			}
+		} else {
+			switch (commandSelectorIndex) {
+				case 0:
+					if (itemButton.activeInHierarchy) {
+						commandSelectorRect.anchoredPosition = itemButtonPosition;
+						commandSelectorIndex = 1;
+					} else if (magicButton.activeInHierarchy) {
+						commandSelectorRect.anchoredPosition = magicButtonPosition;
+						commandSelectorIndex = 2;
+					}
+					break;
+				case 1:
+					if (magicButton.activeInHierarchy) {
+						commandSelectorRect.anchoredPosition = magicButtonPosition;
+						commandSelectorIndex = 2;
+					}
+					break;
+				case 2:
+					break;
 			}
 		}
 	}
@@ -86,6 +158,7 @@ public class GameController : MonoBehaviour {
 		takingTurn = true;
 		Time.timeScale = 0;
 		commandPanel.SetActive(true);
+		commandSelectorRect.anchoredPosition = attackButtonPosition;
 		itemButton.SetActive(itemCooldown-- <= 0);
 		magicButton.SetActive(magicCooldown-- <= 0);
 		if (itemCooldown < 0) {
@@ -93,6 +166,11 @@ public class GameController : MonoBehaviour {
 		}
 		if (magicCooldown < 0) {
 			magicCooldown = 0;
+		}
+
+		// Clear out all magic tokens.
+		foreach (CommandObjectController controller in magicControllers) {
+			controller.despawn();
 		}
 	}
 
@@ -117,13 +195,10 @@ public class GameController : MonoBehaviour {
 		turnStart();
 		magicCooldown = magicCooldownMax;
 		magicCounter = 0;
-		magicControllers = new List<MagicController>();
-		randSpawner.spawn(magicPrefab, magicCounterMax);
-		Debug.Log("Magic was selected");
+		magicControllers = randSpawner.spawn(magicPrefab, magicCounterMax);
 	}
 
 	public void magicActivation(MagicController controller) {
-		magicControllers.Add(controller);
 		magicCounter++;
 		if (magicCounter >= magicCounterMax) {
 			castSpell();
@@ -142,7 +217,7 @@ public class GameController : MonoBehaviour {
 
 	private void castFireball() {
 		// TODO Visual fancy things to indicate heal spell.
-		foreach (MagicController controller in magicControllers) {
+		foreach (CommandObjectController controller in magicControllers) {
 			GameObject particles = Instantiate(damageParticleSystem, controller.transform.position, Quaternion.identity);
 			DamageParticleController particleController = particles.GetComponent<DamageParticleController>();
 			particleController.setColor(Color.red);
@@ -154,7 +229,7 @@ public class GameController : MonoBehaviour {
 
 	private void castHeal() {
 		// TODO Visual fancy things to indicate fireball spell.
-		foreach (MagicController controller in magicControllers) {
+		foreach (CommandObjectController controller in magicControllers) {
 			GameObject particles = Instantiate(damageParticleSystem, controller.transform.position, Quaternion.identity);
 			DamageParticleController particleController = particles.GetComponent<DamageParticleController>();
 			particleController.setColor(Color.green);
