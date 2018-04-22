@@ -26,9 +26,13 @@ public class GameController : MonoBehaviour {
 	private int crosshairCounter = 0;
 	/// When the counter reaches this limit, the next crosshair attack deals extra damage.
 	private int crosshairStrike = 2;
+	/// The latest time we spanwed a crosshair automatically.
+	private float autoattackTime;
+	/// How long to wait between spawning crosshairs automatically.
+	private float autoattackInterval = 4f;
 
 	private float turnStartTime = -20f;
-	private float turnDuration = 7f;
+	private float turnDuration = 10f;
 	private int itemCooldownMax = 1;
 	private int itemCooldown = 0;
 	private int magicCooldownMax = 2;
@@ -64,14 +68,22 @@ public class GameController : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 		float delta = Time.time - turnStartTime;
+		float autoattackDelta = Time.time - autoattackTime;
 		turnBar.setCurrentValue(delta);
 		if (!takingTurn && delta >= turnDuration) {
 			nextTurn();
+		}
+		if (!takingTurn) {
+			if (autoattackDelta > autoattackInterval) {
+				autoattackTime = Time.time;
+				randSpawner.spawn(crosshairPrefab, 1);
+			}
 		}
 	}
 
 	private void nextTurn() {
 		takingTurn = true;
+		Time.timeScale = 0;
 		commandPanel.SetActive(true);
 		itemButton.SetActive(itemCooldown-- <= 0);
 		magicButton.SetActive(magicCooldown-- <= 0);
@@ -83,25 +95,25 @@ public class GameController : MonoBehaviour {
 		}
 	}
 
-	public void handleAttackClick() {
+	private void turnStart() {
 		commandPanel.SetActive(false);
 		turnStartTime = Time.time;
 		takingTurn = false;
+		Time.timeScale = 1f;
+	}
+	public void handleAttackClick() {
+		turnStart();
 		randSpawner.spawn(crosshairPrefab, 9);
 	}
 
 	public void handleItemClick() {
-		commandPanel.SetActive(false);
-		turnStartTime = Time.time;
-		takingTurn = false;
+		turnStart();
 		itemCooldown = itemCooldownMax;
 		randSpawner.spawn(potionPrefab, 5);
 	}
 
 	public void handleMagicClick() {
-		commandPanel.SetActive(false);
-		turnStartTime = Time.time;
-		takingTurn = false;
+		turnStart();
 		magicCooldown = magicCooldownMax;
 		magicCounter = 0;
 		magicControllers = new List<MagicController>();

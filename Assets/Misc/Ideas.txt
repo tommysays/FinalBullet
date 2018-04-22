@@ -8,6 +8,7 @@ While selecting a command, the bullets (and player movement) will be paused.
 Once a command is issued, the player has a limited amount of time to complete a small objective to successfully execute the command.
 After the objective is completed, or if time runs out, a new command can be issued.
 Attack and Item commands have small rewards for completing all objectives.
+During play, an attack crosshair will spawn every few seconds.
 
 Attack:
 	Spawns several crosshairs on the field. If the player touches them, the boss will be damaged.
