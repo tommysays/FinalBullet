@@ -12,6 +12,7 @@ public class GameController : MonoBehaviour {
 	public GameObject damageParticleSystem;
 	public GameObject crosshairPrefab;
 	public GameObject potionPrefab;
+	public GameObject magicPrefab;
 	public GameObject commandPanel;
 	public GameObject attackButton;
 	public GameObject itemButton;
@@ -33,6 +34,12 @@ public class GameController : MonoBehaviour {
 	private int magicCooldownMax = 2;
 	private int magicCooldown = 0;
 	private bool takingTurn = false;
+
+	/// Keeps track of how many magic tokens have been activated
+	private int magicCounter = 0;
+	/// How many magic tokens need to be activated to cast a spell.
+	private int magicCounterMax = 4;
+	private List<MagicController> magicControllers;
 
 	// Use this for initialization
 	void Start () {
@@ -96,7 +103,52 @@ public class GameController : MonoBehaviour {
 		turnStartTime = Time.time;
 		takingTurn = false;
 		magicCooldown = magicCooldownMax;
+		magicCounter = 0;
+		magicControllers = new List<MagicController>();
+		randSpawner.spawn(magicPrefab, magicCounterMax);
 		Debug.Log("Magic was selected");
+	}
+
+	public void magicActivation(MagicController controller) {
+		magicControllers.Add(controller);
+		magicCounter++;
+		if (magicCounter >= magicCounterMax) {
+			castSpell();
+		}
+	}
+
+	/// Chooses a random spell to cast.
+	private void castSpell() {
+		float rand = Random.value;
+		if (rand < 0.5f) {
+			castHeal();
+		} else {
+			castFireball();
+		}
+	}
+
+	private void castFireball() {
+		// TODO Visual fancy things to indicate heal spell.
+		foreach (MagicController controller in magicControllers) {
+			GameObject particles = Instantiate(damageParticleSystem, controller.transform.position, Quaternion.identity);
+			DamageParticleController particleController = particles.GetComponent<DamageParticleController>();
+			particleController.setColor(Color.red);
+			particleController.destination = bulletSpawnerObj.transform.position;
+			Destroy(controller.gameObject);
+		}
+		damageBoss(60);
+	}
+
+	private void castHeal() {
+		// TODO Visual fancy things to indicate fireball spell.
+		foreach (MagicController controller in magicControllers) {
+			GameObject particles = Instantiate(damageParticleSystem, controller.transform.position, Quaternion.identity);
+			DamageParticleController particleController = particles.GetComponent<DamageParticleController>();
+			particleController.setColor(Color.green);
+			particleController.destination = playerHpBarObj.transform.position;
+			Destroy(controller.gameObject);
+		}
+		healPlayer(20);
 	}
 
 	public void crosshairAttack(Vector3 origin, int amount) {
