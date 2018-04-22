@@ -155,13 +155,31 @@ public class GameController : MonoBehaviour {
 		if (crosshairCounter++ >= crosshairStrike) {
 			crosshairCounter = 0;
 			amount *= 3;
+			StartCoroutine(criticalAttack(origin, bulletSpawnerObj.transform.position));
+		} else {
+			GameObject particles = Instantiate(damageParticleSystem, origin, Quaternion.identity);
+			particles.GetComponent<DamageParticleController>().destination = bulletSpawnerObj.transform.position;
 		}
-		damageBoss(origin, amount);
-	}
-	public void damageBoss(Vector3 origin, int amount) {
-		GameObject particles = Instantiate(damageParticleSystem, origin, Quaternion.identity);
-		particles.GetComponent<DamageParticleController>().destination = bulletSpawnerObj.transform.position;
 		damageBoss(amount);
+	}
+
+	private IEnumerator criticalAttack(Vector3 origin, Vector3 destination) {
+		GameObject particles = Instantiate(damageParticleSystem, origin, Quaternion.identity);
+		particles.transform.localScale = new Vector3(5f, 5f, 5f);
+		DamageParticleController controller = particles.GetComponent<DamageParticleController>();
+		controller.destination = bulletSpawnerObj.transform.position;
+		controller.setColor(Color.red);
+		yield return new WaitForSeconds(0.1f);
+		particles = Instantiate(damageParticleSystem, origin, Quaternion.identity);
+		particles.transform.localScale = new Vector3(2f, 2f, 2f);
+		controller = particles.GetComponent<DamageParticleController>();
+		controller.destination = bulletSpawnerObj.transform.position;
+		controller.setColor(new Color(1f, 0.5f, 0f));
+		yield return new WaitForSeconds(0.1f);
+		particles = Instantiate(damageParticleSystem, origin, Quaternion.identity);
+		controller = particles.GetComponent<DamageParticleController>();
+		controller.destination = bulletSpawnerObj.transform.position;
+		controller.setColor(new Color(1f, 1f, 0f));
 	}
 
 	public void damageBoss(int amount) {
