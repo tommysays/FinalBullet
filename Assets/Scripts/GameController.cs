@@ -31,7 +31,7 @@ public class GameController : MonoBehaviour {
 	/// How long to wait between spawning crosshairs automatically.
 	private float autoattackInterval = 4f;
 
-	private float turnStartTime = -20f;
+	private float turnStartTime = 0f;
 	private float turnDuration = 10f;
 	private int itemCooldownMax = 1;
 	private int itemCooldown = 0;
@@ -82,6 +82,7 @@ public class GameController : MonoBehaviour {
 	}
 
 	private void nextTurn() {
+		// TODO Play a jingle to signal turn.
 		takingTurn = true;
 		Time.timeScale = 0;
 		commandPanel.SetActive(true);
@@ -146,7 +147,7 @@ public class GameController : MonoBehaviour {
 			DamageParticleController particleController = particles.GetComponent<DamageParticleController>();
 			particleController.setColor(Color.red);
 			particleController.destination = bulletSpawnerObj.transform.position;
-			Destroy(controller.gameObject);
+			controller.despawn();
 		}
 		damageBoss(60);
 	}
@@ -158,7 +159,7 @@ public class GameController : MonoBehaviour {
 			DamageParticleController particleController = particles.GetComponent<DamageParticleController>();
 			particleController.setColor(Color.green);
 			particleController.destination = playerHpBarObj.transform.position;
-			Destroy(controller.gameObject);
+			controller.despawn();
 		}
 		healPlayer(20);
 	}

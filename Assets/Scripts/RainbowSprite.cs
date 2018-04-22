@@ -15,6 +15,7 @@ public class RainbowSprite : MonoBehaviour {
 	private float minGreen = min;
 	private float minBlue = min;
 	private int state = 0;
+	public bool shouldChange = true;
 	// Use this for initialization
 	void Start () {
 		sprite = GetComponent<SpriteRenderer>();
@@ -22,6 +23,9 @@ public class RainbowSprite : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
+		if (!shouldChange) {
+			return;
+		}
 		switch (state) {
 			case 0:
 				// Yellow to green
