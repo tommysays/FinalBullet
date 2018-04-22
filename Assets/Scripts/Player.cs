@@ -39,9 +39,6 @@ public class Character {
 		if (hp < 0) {
 			hp = 0;
 		}
-		if (hp == 0) {
-			Debug.Log("Player lost all hp! GG");
-		}
 	}
 	public void heal(int amount) {
 		if (amount < 0) {

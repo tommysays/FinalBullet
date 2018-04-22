@@ -28,6 +28,7 @@ public class GameController : MonoBehaviour {
 	public GameObject thiefPanel;
 	public GameObject magePanel;
 	public GameObject bossImageObj;
+	public GameObject[] characterImages;
 	private Boss boss;
 	private ColorFlasher bossFlasher;
 	private ScalingBar bossHpBar;
@@ -486,9 +487,9 @@ public class GameController : MonoBehaviour {
 		Character character = characters[(int)currentCharacter];
 		character.damage(amount);
 		currentCharacterHpBar.setCurrentValue(character.hp);
-		Debug.Log("Player is now at " + character.hp + " hp.");
 		if (character.hp == 0) {
-			Debug.Log("Player is ded :(");
+			characterImages[(int)currentCharacter].GetComponent<ColorFlasher>().setFlashSpeed(1f).swapColor(Color.clear);
+			// TODO Choose other character or game over.
 		}
 	}
 
