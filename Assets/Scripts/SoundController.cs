@@ -13,6 +13,10 @@ public class SoundController : MonoBehaviour {
 	public AudioClip battleMusic;
 	private AudioSource source;
 
+	void Start() {
+		source = GetComponent<AudioSource>();
+	}
+
 	public void playSound(SOUND sound) {
 		switch (sound) {
 			case SOUND.ERROR:

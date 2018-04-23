@@ -27,7 +27,6 @@ public class ColorFlasher : MonoBehaviour {
 			if (delta > flashSpeed) {
 				isFlashing = false;
 				image.color = originalColor;
-				print(flashSpeed);
 			} else {
 				image.color = Color.Lerp(tempColor, originalColor, delta / flashSpeed);
 			}
