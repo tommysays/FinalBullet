@@ -29,6 +29,8 @@ public class GameController : MonoBehaviour {
 	public GameObject magePanel;
 	public GameObject bossImageObj;
 	public GameObject[] characterImages;
+	public GameObject soundObj;
+	private SoundController soundController;
 	private Boss boss;
 	private ColorFlasher bossFlasher;
 	private ScalingBar bossHpBar;
@@ -83,6 +85,9 @@ public class GameController : MonoBehaviour {
 	private CHARACTER_TYPE currentCharacter = CHARACTER_TYPE.WARRIOR;
 	private List<Character> characters;
 
+	/// If true, player needs to select new character.
+	private bool characterDied = false;
+
 	// Use this for initialization
 	void Start () {
 
@@ -124,6 +129,8 @@ public class GameController : MonoBehaviour {
 		turnBar.maxValue = turnDuration;
 		turnBar.curValue = 0;
 
+		soundController = soundObj.GetComponent<SoundController>();
+
 		pointer = FindObjectOfType<PointerController>();
 		pointer.setCharacter(currentCharacter);
 	}
@@ -133,6 +140,17 @@ public class GameController : MonoBehaviour {
 		float delta = Time.time - turnStartTime;
 		float autoattackDelta = Time.time - autoattackTime;
 		turnBar.setCurrentValue(delta);
+		if (characterDied) {
+			selectorIndex = 1;
+			if (Input.GetButtonDown("Up")) {
+				moveSelector(0);
+			} else if (Input.GetButtonDown("Down")) {
+				moveSelector(1);
+			} else if (Input.GetButtonDown("Submit")) {
+				evaluateSubmit();
+			}
+			return;
+		}
 		if (takingTurn) {
 			if (Input.GetButtonDown("Up")) {
 				moveSelector(0);
@@ -146,8 +164,9 @@ public class GameController : MonoBehaviour {
 				evaluateSubmit();
 			}
 		} else {
-			if (delta >= turnDuration) {
+			if (!turnAvailable && delta >= turnDuration) {
 				turnAvailable = true;
+				soundController.playSound(SOUND.TURN_READY);
 				// Expire all magic tokens left.
 				foreach (CommandObjectController controller in magicControllers) {
 					controller.despawn();
@@ -186,7 +205,7 @@ public class GameController : MonoBehaviour {
 						changeCharacter(CHARACTER_TYPE.WARRIOR);
 						disableSelectors();
 					} else {
-						// TODO Play brr brr chime
+						soundController.playSound(SOUND.ERROR);
 					}
 					break;
 				case 1:
@@ -194,7 +213,7 @@ public class GameController : MonoBehaviour {
 						changeCharacter(CHARACTER_TYPE.THIEF);
 						disableSelectors();
 					} else {
-						// TODO Play brr brr chime
+						soundController.playSound(SOUND.ERROR);
 					}
 					break;
 				case 2:
@@ -202,7 +221,7 @@ public class GameController : MonoBehaviour {
 						changeCharacter(CHARACTER_TYPE.MAGE);
 						disableSelectors();
 					} else {
-						// TODO Play brr brr chime
+						soundController.playSound(SOUND.ERROR);
 					}
 					break;
 			}
@@ -211,6 +230,8 @@ public class GameController : MonoBehaviour {
 
 	/// Changes character and starts the next turn.
 	private void changeCharacter(CHARACTER_TYPE character) {
+		characterDied = false;
+		pointer.start();
 		currentCharacter = character;
 		pointer.setCharacter(character);
 		switch (character) {
@@ -489,7 +510,13 @@ public class GameController : MonoBehaviour {
 		currentCharacterHpBar.setCurrentValue(character.hp);
 		if (character.hp == 0) {
 			characterImages[(int)currentCharacter].GetComponent<ColorFlasher>().setFlashSpeed(1f).swapColor(Color.clear);
-			// TODO Choose other character or game over.
+			pointer.stop();
+			if (characters[0].hp == 0 && characters[1].hp == 0 && characters[2].hp == 0) {
+				// TODO Game Over
+				Debug.Log("All characters are dead. Game over!");
+			} else {
+				StartCoroutine(stopTimeAfterSeconds(1f));
+			}
 		}
 	}
 
@@ -498,5 +525,12 @@ public class GameController : MonoBehaviour {
 		character.heal(amount);
 		currentCharacterHpBar.setCurrentValue(character.hp);
 		Debug.Log("Player is now at " + character.hp + " hp.");
+	}
+
+	private IEnumerator stopTimeAfterSeconds(float seconds) {
+		yield return new WaitForSeconds(seconds);
+		Time.timeScale = 0f;
+		characterDied = true;
+		characterSelector.SetActive(true);
 	}
 }
