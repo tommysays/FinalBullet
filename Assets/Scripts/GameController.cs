@@ -10,6 +10,7 @@ public class GameController : MonoBehaviour {
 	public GameObject thiefHpBarObj;
 	public GameObject mageHpBarObj;
 	public GameObject turnBarObj;
+	public GameObject turnBarHighlightObj;
 	public GameObject randomSpawnerObj;
 	public GameObject bulletSpawnerObj;
 	public GameObject damageParticleSystem;
@@ -33,6 +34,7 @@ public class GameController : MonoBehaviour {
 	private SoundController soundController;
 	private Boss boss;
 	private ColorFlasher bossFlasher;
+	private ColorFlasher turnBarFlasher;
 	private ScalingBar bossHpBar;
 	private ScalingBar currentCharacterHpBar;
 	private ScalingBar turnBar;
@@ -128,6 +130,7 @@ public class GameController : MonoBehaviour {
 		turnBar = turnBarObj.GetComponent<ScalingBar>();
 		turnBar.maxValue = turnDuration;
 		turnBar.curValue = 0;
+		turnBarFlasher = turnBarHighlightObj.GetComponent<ColorFlasher>();
 
 		soundController = soundObj.GetComponent<SoundController>();
 
@@ -167,6 +170,7 @@ public class GameController : MonoBehaviour {
 			if (!turnAvailable && delta >= turnDuration) {
 				turnAvailable = true;
 				soundController.playSound(SOUND.TURN_READY);
+				StartCoroutine(flashTurnBar());
 				// Expire all magic tokens left.
 				foreach (CommandObjectController controller in magicControllers) {
 					controller.despawn();
@@ -180,6 +184,12 @@ public class GameController : MonoBehaviour {
 			turnAvailable = false;
 			nextTurn();
 		}
+	}
+
+	private IEnumerator flashTurnBar() {
+		turnBarFlasher.flashColor(Color.white);
+		yield return new WaitForSeconds(0.2f);
+		turnBarFlasher.flashColor(Color.white);
 	}
 
 	private void evaluateSubmit() {
